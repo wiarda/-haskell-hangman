@@ -6,7 +6,7 @@ type WordList = [String]
 
 readDict :: IO WordList
 readDict = do
-  dict <- readFile "./words"
+  dict <- readFile "src/dict"
   return (lines dict)
 
 filterDict :: WordList -> WordList
@@ -29,3 +29,4 @@ getRandomWord wl = do
 
 randomWord :: IO String
 randomWord = gameWords >>= getRandomWord
+
