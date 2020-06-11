@@ -1,12 +1,12 @@
 module Main where
 
-import Control.Monad (forever)
 import Data.Char (toLower)
-import Data.Maybe (isJust)
 import System.Exit (exitSuccess)
 import Words (randomWord)
-import Puzzle
+import Puzzle (runGame, initPuzzle)
 
 main :: IO ()
 main = do
-  putStrLn "Hangman"
+  word <- randomWord
+  let puzzle = initPuzzle word
+  runGame puzzle

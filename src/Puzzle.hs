@@ -1,6 +1,8 @@
 module Puzzle where
 
 import Data.List
+import Data.Maybe (isJust)
+import Control.Monad (forever)
 import System.Exit (exitSuccess)
 
 data Puzzle = Puzzle String [Maybe Char] [Char]
@@ -57,3 +59,24 @@ gameOver (Puzzle word _ guessed) =
       putStrLn $ "The word was:" ++ word
       exitSuccess
   else return ()
+
+gameWon :: Puzzle -> IO ()
+gameWon (Puzzle _ filledInSoFar _) =
+  if all isJust filledInSoFar then
+    do 
+      putStrLn "You win!"
+      exitSuccess
+  else return ()
+
+runGame :: Puzzle -> IO ()
+runGame puzzle = forever $ do
+  gameOver puzzle
+  gameWon puzzle
+  putStrLn $
+    show puzzle
+  putStrLn "Guess a letter: "
+  guess <- getLine
+
+  case guess of 
+    [c] -> parseGuess puzzle c >>= runGame
+    _ -> putStrLn "Your guess must be a single letter."
