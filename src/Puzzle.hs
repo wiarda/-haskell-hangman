@@ -5,13 +5,15 @@ import Data.Maybe (isJust)
 import Control.Monad (forever)
 import System.Exit (exitSuccess)
 
+maxGuesses = 7
+
 data Puzzle = Puzzle String [Maybe Char] [Char]
 
 instance Show Puzzle where
   show (Puzzle _ matched guessed) = 
     (intersperse ' ' $
     fmap renderPuzzleChar matched)
-    ++ " Guessed so far: " ++ guessed
+    ++ "\nGuessed so far: " ++ (intersperse ' ' guessed)
 
 renderPuzzleChar :: Maybe Char -> Char
 renderPuzzleChar Nothing = '_'
@@ -37,6 +39,7 @@ fillInChar (Puzzle word matchedSoFar guessed) x =
 
 parseGuess :: Puzzle -> Char -> IO Puzzle
 parseGuess p g = do
+  putStrLn ""
   putStrLn $ "You guessed " ++ [g]
   let result = fillInChar p g
   case (charInWord p g, alreadyGuessed p g) of
@@ -44,18 +47,25 @@ parseGuess p g = do
       putStrLn "You've already guessed this letter!"
       return result
     (True, _) -> do
-      putStrLn "You've matched a letter!"
+      putStrLn "You matched a letter!"
       return result
     (False, _) -> do
-      putStrLn "Bad guess!"
+      let guessesLeft = show $ maxGuesses - (countMisses result)
+      putStrLn $ "Uh oh, try again! You have " ++ guessesLeft ++ " guesses left."
       return result
+
+
+
+countMisses :: Puzzle -> Int
+countMisses (Puzzle word _ guesses) = 
+  length . filter (\x -> not $ elem x word) $ guesses
 
 
 gameOver :: Puzzle -> IO ()
-gameOver (Puzzle word _ guessed) = 
-  if (length guessed) > 7 then
+gameOver p@(Puzzle word _ guessed) = 
+  if (countMisses p >= 7) then
     do 
-      putStrLn "You guessed too many times! Game over!"
+      putStrLn "You guessed incorrectly too many times :("
       putStrLn $ "The word was:" ++ word
       exitSuccess
   else return ()
