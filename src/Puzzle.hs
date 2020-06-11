@@ -13,7 +13,7 @@ instance Show Puzzle where
   show (Puzzle _ matched guessed) = 
     (intersperse ' ' $
     fmap renderPuzzleChar matched)
-    ++ " Guessed so far: " ++ guessed
+    ++ "\nGuessed so far: " ++ (intersperse ' ' guessed)
 
 renderPuzzleChar :: Maybe Char -> Char
 renderPuzzleChar Nothing = '_'
@@ -39,6 +39,7 @@ fillInChar (Puzzle word matchedSoFar guessed) x =
 
 parseGuess :: Puzzle -> Char -> IO Puzzle
 parseGuess p g = do
+  putStrLn ""
   putStrLn $ "You guessed " ++ [g]
   let result = fillInChar p g
   case (charInWord p g, alreadyGuessed p g) of
@@ -49,8 +50,10 @@ parseGuess p g = do
       putStrLn "You matched a letter!"
       return result
     (False, _) -> do
-      putStrLn "Uh oh, try again!"
+      let guessesLeft = show $ maxGuesses - (countMisses result)
+      putStrLn $ "Uh oh, try again! You have " ++ guessesLeft ++ " guesses left."
       return result
+
 
 
 countMisses :: Puzzle -> Int
@@ -60,7 +63,7 @@ countMisses (Puzzle word _ guesses) =
 
 gameOver :: Puzzle -> IO ()
 gameOver p@(Puzzle word _ guessed) = 
-  if (countMisses p > 7) then
+  if (countMisses p >= 7) then
     do 
       putStrLn "You guessed incorrectly too many times :("
       putStrLn $ "The word was:" ++ word
