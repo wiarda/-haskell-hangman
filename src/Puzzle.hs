@@ -53,12 +53,15 @@ parseGuess p g = do
 
 gameOver :: Puzzle -> IO ()
 gameOver (Puzzle word _ guessed) = 
-  if (length guessed) > 7 then
+  if (missedGuesses > 7) then
     do 
       putStrLn "You guessed too many times! Game over!"
       putStrLn $ "The word was:" ++ word
       exitSuccess
   else return ()
+  where 
+    missedGuesses =
+      (length . filter (\x -> not $ elem x word)) guessed
 
 gameWon :: Puzzle -> IO ()
 gameWon (Puzzle _ filledInSoFar _) =
